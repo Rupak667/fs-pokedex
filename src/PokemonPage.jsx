@@ -9,35 +9,52 @@ const formatName = (nameWithDash) => nameWithDash.replace('-', ' ')
 
 const PokemonPage = ({ previous, next }) => {
   const { name } = useParams()
-  const { data: pokemon, error, isLoading } = useApi(`https://pokeapi.co/api/v2/pokemon/${name}`)
+  const { data: pokemon, error, isLoading } = useApi(
+    `https://pokeapi.co/api/v2/pokemon/${name}`
+  )
 
-  if (isLoading) {
-    return <LoadingSpinner />
-  }
-  if (error) {
-    return <ErrorMessage error={error} />
-  }
+  if (isLoading) return <LoadingSpinner />
+  if (error) return <ErrorMessage error={error} />
 
-  const { type } = pokemon.types.find((type) => type.slot === 1)
-  const stats = pokemon.stats.map((stat) => ({
-    name: formatName(stat.stat.name),
-    value: stat.base_stat
-  })).reverse()
-  const normalAbility = pokemon.abilities.find((ability) => !ability.is_hidden)
-  const hiddenAbility = pokemon.abilities.find((ability) => ability.is_hidden === true)
+  // ✅ FIX: no optional chaining
+  const mainType = pokemon.types.find(t => t.slot === 1)
+  const type = mainType ? mainType.type : null
 
-  console.log('hiddenAbility=', hiddenAbility)
+  const stats = pokemon.stats
+    .map(stat => ({
+      name: formatName(stat.stat.name),
+      value: stat.base_stat
+    }))
+    .reverse()
+
+  const normalAbility = pokemon.abilities.find(a => !a.is_hidden)
+  const hiddenAbility = pokemon.abilities.find(a => a.is_hidden)
+
   return (
     <>
       <div className="links">
-        {previous && <Link to={`/pokemon/${previous.name}`}>Previous</Link>}
+        {previous && (
+          <Link to={`/pokemon/${previous.name}`}>Previous</Link>
+        )}
+
         <Link to="/">Home</Link>
-        {next && <Link to={`/pokemon/${previous.name}`}>Next</Link>}
+
+        {next && (
+          <Link to={`/pokemon/${next.name}`}>Next</Link>
+        )}
       </div>
-      <div className={`pokemon-page pokemon-type-${type.name}`}>
-        <div className="pokemon-image" style={{ backgroundImage: `url(${pokemon.sprites.front_default})` }} />
+
+      <div className={`pokemon-page pokemon-type-${type ? type.name : 'normal'}`}>
+        <div
+          className="pokemon-image"
+          style={{
+            backgroundImage: `url(${pokemon.sprites.front_default})`
+          }}
+        />
+
         <div className="pokemon-info">
           <div className="pokemon-name">{pokemon.name}</div>
+
           <div className="pokemon-stats" data-testid="stats">
             <table>
               <tbody>
@@ -50,9 +67,18 @@ const PokemonPage = ({ previous, next }) => {
               </tbody>
             </table>
           </div>
+
           <div className="pokemon-abilities">
-            {normalAbility && <PokemonAbility abilityName={formatName(normalAbility.ability.name)} />}
-            {hiddenAbility && <PokemonAbility abilityName={formatName(hiddenAbility.ability.name)} />}
+            {normalAbility && (
+              <PokemonAbility
+                abilityName={formatName(normalAbility.ability.name)}
+              />
+            )}
+            {hiddenAbility && (
+              <PokemonAbility
+                abilityName={formatName(hiddenAbility.ability.name)}
+              />
+            )}
           </div>
         </div>
       </div>
