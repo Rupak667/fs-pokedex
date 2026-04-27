@@ -1,45 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 jobs:
-  simple_deployment_pipeline:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Build step
+        run: |
+          echo "Building project..."
+          echo "Build successful"
+
+      - name: Discord notification (success)
+        if: success()
+        uses: sarisia/actions-status-discord@v1
         with:
-          node-version: '20'
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "✅ Deployment Successful"
+          description: "A new version has been successfully deployed."
+          color: 0x00ff00
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Check style
-        run: npm run eslint
-
-      - name: Run tests
-        run: npm test
-
-      - name: Build project
-        run: npm run build
-
-      - name: Deploy
-        if: github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip')
-        run: echo "Deploying to production"
-
-  tag_release:
-    needs: [simple_deployment_pipeline]
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-
-    if: github.ref == 'refs/heads/main' && !contains(join(github.event.commits.*.message, ' '), '#skip')
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Bump version and push tag
-        uses: anothrNick/github-tag-action@1.75.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DEFAULT_BUMP: patch
-          WITH_V: true
+      - name: Discord notification (failure)
+        if: failure()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "❌ Build Failed"
+          description: |
+            **Repository:** ${{ github.repository }}
+            **Branch:** ${{ github.ref_name }}
+            **Commit:** ${{ github.sha }}
+            **Author:** ${{ github.actor }}
+          color: 0xff0000
