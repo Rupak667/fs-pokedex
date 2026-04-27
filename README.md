@@ -16,3 +16,4 @@ Start by running `npm install` inside the project folder
 App is deployed on Fly.io:
 
 https://fs-pokedex-cool-morning-196.fly.dev/
+https://fs-pokedex-zoub.onrender.com/
