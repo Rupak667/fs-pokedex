@@ -1,13 +1,3 @@
-name: Deployment pipeline
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize]
-
 jobs:
   simple_deployment_pipeline:
     runs-on: ubuntu-latest
@@ -32,7 +22,7 @@ jobs:
         run: npm run build
 
       - name: Deploy
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip')
         run: echo "Deploying to production"
 
   tag_release:
@@ -42,7 +32,7 @@ jobs:
     permissions:
       contents: write
 
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && !contains(join(github.event.commits.*.message, ' '), '#skip')
 
     steps:
       - uses: actions/checkout@v4
