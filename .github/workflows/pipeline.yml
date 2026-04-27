@@ -23,21 +23,16 @@ jobs:
 
       - name: Discord notification (success)
         if: success()
-        uses: Ilshidur/action-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        with:
-          args: "✅ Deployment Successful: ${{ github.repository }}"
+        run: |
+          curl -H "Content-Type: application/json" \
+          -X POST \
+          -d "{\"content\": \"✅ Deployment Successful: ${{ github.repository }}\"}" \
+          ${{ secrets.DISCORD_WEBHOOK }}
 
       - name: Discord notification (failure)
         if: failure()
-        uses: Ilshidur/action-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        with:
-          args: |
-            ❌ Build Failed
-            Repository: ${{ github.repository }}
-            Branch: ${{ github.ref_name }}
-            Commit: ${{ github.sha }}
-            Author: ${{ github.actor }}
+        run: |
+          curl -H "Content-Type: application/json" \
+          -X POST \
+          -d "{\"content\": \"❌ Build Failed\nRepo: ${{ github.repository }}\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}\"}" \
+          ${{ secrets.DISCORD_WEBHOOK }}
