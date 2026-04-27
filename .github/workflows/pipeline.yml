@@ -1,5 +1,5 @@
 name: Deployment pipeline
-if: ${{ github.event_name == 'push' }}
+
 on:
   push:
     branches:
@@ -11,7 +11,7 @@ on:
 jobs:
   simple_deployment_pipeline:
     runs-on: ubuntu-latest
-if: ${{ github.event_name == 'push' }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -30,3 +30,7 @@ if: ${{ github.event_name == 'push' }}
 
       - name: Build project
         run: npm run build
+
+      - name: Deploy
+        if: ${{ github.event_name == 'push' }}
+        run: echo "Deploying to production"
