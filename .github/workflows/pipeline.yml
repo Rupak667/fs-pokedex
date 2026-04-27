@@ -17,7 +17,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '20'
 
       - name: Install dependencies
         run: npm install
@@ -32,13 +32,15 @@ jobs:
         run: npm run build
 
       - name: Deploy
-        if: ${{ github.event_name == 'push' }}
+        if: github.event_name == 'push'
         run: echo "Deploying to production"
 
   tag_release:
-    if: ${{ github.event_name == 'push' }}
     needs: [simple_deployment_pipeline]
     runs-on: ubuntu-latest
+
+    # ✅ ONLY run on main branch push
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - uses: actions/checkout@v4
