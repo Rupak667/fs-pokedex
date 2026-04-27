@@ -1,5 +1,5 @@
 name: Deployment pipeline
-
+if: ${{ github.event_name == 'push' }}
 on:
   push:
     branches:
